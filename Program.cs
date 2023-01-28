@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MSRCP_Server.Models;
+using MSRCP_Server.Repos;
+using MSRCP_Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DataContext>(o => o.UseNpgsql(builder.Configuration.GetConnectionString("MSRCP")));
+
+builder.Services.AddTransient<IUserRepo,UserRepo>();
+builder.Services.AddSingleton<IUserService, UserService>();
 
 var app = builder.Build();
 
