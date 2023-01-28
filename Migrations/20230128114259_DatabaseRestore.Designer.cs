@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MSRCPServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230127194521_FixUsers")]
-    partial class FixUsers
+    [Migration("20230128114259_DatabaseRestore")]
+    partial class DatabaseRestore
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,17 +65,16 @@ namespace MSRCPServer.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("EndTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -87,9 +86,13 @@ namespace MSRCPServer.Migrations
 
             modelBuilder.Entity("MSRCP_Server.Models.WorkData", b =>
                 {
-                    b.HasOne("MSRCP_Server.Models.User", null)
+                    b.HasOne("MSRCP_Server.Models.User", "User")
                         .WithMany("WorkDatas")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MSRCP_Server.Models.User", b =>

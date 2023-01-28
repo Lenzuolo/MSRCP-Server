@@ -9,15 +9,6 @@ namespace MSRCP_Server.Models
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                var connectionString = builder.Build().GetSection("ConnectionStrings").GetSection("MSRCP").Value;
-            }
-        }
-
         public DbSet<User> Users { get; set; }
         public DbSet<WorkData> WorkDatas { get; set; }
     }
