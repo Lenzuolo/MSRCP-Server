@@ -7,20 +7,26 @@ namespace MSRCP_Server.Services;
 
 public class UserService : IUserService
 {
-    private readonly IUserRepo UserRepo;
+    private readonly IUserRepo userRepo;
     public UserService(IUserRepo userRepo)
     {
-        this.UserRepo = userRepo;
+        this.userRepo = userRepo;
     }
 
-    public async Task<IActionResult> CreateUserAsync(User user)
+    public async Task<IActionResult> Login(string userName, string passwordHash)
     {
-        if (user == null)
+        var result = await userRepo.Login(userName, passwordHash);
+        if (result != null)
         {
-            return new JsonResult(new ExceptionDTO { Message = "User data is missing" }) { StatusCode = StatusCodes.Status422UnprocessableEntity };
+            return new JsonResult(result) { StatusCode = StatusCodes.Status202Accepted };
         }
+        return new JsonResult(new ExceptionDTO { Message = "User not found" }) { StatusCode = StatusCodes.Status404NotFound };
+    }
+    public async Task<IActionResult> CreateUserAsync(RegisterDTO registerDTO)
+    {
+        var user = CreateUserFromRegisterDTO(registerDTO);
 
-        var result = await UserRepo.AddAsync(user);
+        var result = await userRepo.AddAsync(user);
         if (result != null)
         {
             return new JsonResult(result) { StatusCode = StatusCodes.Status201Created };
@@ -30,7 +36,7 @@ public class UserService : IUserService
 
     public async Task<IActionResult> GetTeamAsync(int id)
     {
-        var result = await UserRepo.GetTeamAsync(id);
+        var result = await userRepo.GetTeamAsync(id);
         if (result != null)
         {
             return new JsonResult(result) { StatusCode = StatusCodes.Status200OK };
@@ -40,17 +46,17 @@ public class UserService : IUserService
 
     public async Task<IActionResult> GetUserAsync(int id)
     {
-        var result = await UserRepo.GetAsync(id);
+        var result = await userRepo.GetAsync(id);
         if (result != null)
         {
             return new JsonResult(result) { StatusCode = StatusCodes.Status200OK };
         }
-        return new JsonResult(new ExceptionDTO { Message = "Problem occured while getting user data"}) { StatusCode = StatusCodes.Status404NotFound}
+        return new JsonResult(new ExceptionDTO { Message = "Problem occured while getting user data" }) { StatusCode = StatusCodes.Status404NotFound };
     }
 
     public async Task<IActionResult> GetUserHistoryAsync(int id)
     {
-        var result = await UserRepo.GetUserHistoryAsync(id);
+        var result = await userRepo.GetUserHistoryAsync(id);
         if (result != null)
         {
             return new JsonResult(result) { StatusCode = StatusCodes.Status200OK };
@@ -63,17 +69,41 @@ public class UserService : IUserService
         throw new NotImplementedException();
     }
 
-    public async Task<IActionResult> UpdateUserAsync(User user)
+    public async Task<IActionResult> UpdateUserAsync(UserDTO userDTO)
     {
-        if (user == null)
-        {
-            return new JsonResult(new ExceptionDTO { Message = "User data is missing" }) { StatusCode = StatusCodes.Status422UnprocessableEntity };
-        }
-        var result = await UserRepo.UpdateAsync(user);
+        var user = CreateUserFromUserDTO(userDTO);
+
+        var result = await userRepo.UpdateAsync(user);
         if (result != null)
         {
             return new JsonResult(result) { StatusCode = StatusCodes.Status200OK };
         }
         return new JsonResult(new ExceptionDTO { Message = "Problem occured updating user data"}) { StatusCode = StatusCodes.Status404NotFound };
     }
+
+    private User CreateUserFromRegisterDTO(RegisterDTO registerDTO)
+    {
+        return new User
+        {
+            FirstName = registerDTO.FirstName,
+            LastName = registerDTO.LastName,
+            PasswordHash = registerDTO.PasswordHash,
+            UserName = (registerDTO.FirstName.ElementAt(0) + registerDTO.LastName).ToLower(),
+            IsAdmin = registerDTO.IsAdmin
+        };
+    }
+
+    private User CreateUserFromUserDTO(UserDTO userDTO)
+    {
+        return new User
+        {
+            FirstName = userDTO.FirstName,
+            LastName = userDTO.LastName,
+            PasswordHash = userDTO.PasswordHash,
+            UserName = userDTO.UserName,
+            IsAdmin = userDTO.IsAdmin,
+            Id = userDTO.Id
+        };
+    }
+
 }

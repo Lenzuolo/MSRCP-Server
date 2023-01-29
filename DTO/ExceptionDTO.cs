@@ -2,5 +2,5 @@
 
 public class ExceptionDTO
 {
-    public string Message { get; set; }
+    public string? Message { get; set; }
 }

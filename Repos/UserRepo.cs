@@ -21,7 +21,13 @@ public class UserRepo : IUserRepo
 
     public async Task<User> GetAsync(int id)
     {
-        return await context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        var result = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        if (result != null)
+        {
+            result.PasswordHash = "";
+            result.WorkDatas = new List<WorkData>() { await GetTodaysWorkData(id) };
+        }
+        return result;
     }
 
     public async Task<ICollection<User>> GetTeamAsync(int adminId)
@@ -70,6 +76,17 @@ public class UserRepo : IUserRepo
             await context.SaveChangesAsync();
             return result.Entity;
         }
+    }
+
+    public async Task<User> Login(string userName, string passwordHash)
+    {
+        var result = await context.Users.FirstOrDefaultAsync(u => u.UserName == userName && u.PasswordHash == passwordHash);
+        if (result != null)
+        {
+            result.PasswordHash = "";
+            result.WorkDatas = new List<WorkData>() { await GetTodaysWorkData(result.Id)};
+        }
+        return result;
     }
 
     private async Task<WorkData> GetTodaysWorkData(int userId)

@@ -14,7 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DataContext>(o => o.UseNpgsql(builder.Configuration.GetConnectionString("MSRCP")));
 
 builder.Services.AddTransient<IUserRepo,UserRepo>();
-builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddTransient<IUserService, UserService>();
 
 var app = builder.Build();
 
