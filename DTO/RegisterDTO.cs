@@ -9,7 +9,7 @@ namespace MSRCP_Server.DTO
         [Required(ErrorMessage = "Last name is required", AllowEmptyStrings = false)]
         public string LastName { get; set; }
         [Required(ErrorMessage = "Password is required", AllowEmptyStrings = false)]
-        public string PasswordHash { get; set; }
+        public string Password { get; set; }
 
         public bool IsAdmin { get; set; }
     }

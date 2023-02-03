@@ -13,11 +13,12 @@ public class UserService : IUserService
         this.userRepo = userRepo;
     }
 
-    public async Task<IActionResult> Login(string userName, string passwordHash)
+    public async Task<IActionResult> Login(string userName, string password)
     {
-        var result = await userRepo.Login(userName, passwordHash);
-        if (result != null)
+        var result = await userRepo.GetUserAsync(userName);
+        if (result != null && BCrypt.Net.BCrypt.Verify(password, result.PasswordHash))
         {
+            result.PasswordHash = "";
             return new JsonResult(result) { StatusCode = StatusCodes.Status202Accepted };
         }
         return new JsonResult(new ExceptionDTO { Message = "User not found" }) { StatusCode = StatusCodes.Status404NotFound };
@@ -29,6 +30,7 @@ public class UserService : IUserService
         var result = await userRepo.AddAsync(user);
         if (result != null)
         {
+            result.PasswordHash = "";
             return new JsonResult(result) { StatusCode = StatusCodes.Status201Created };
         }
         return new JsonResult(new ExceptionDTO { Message = "Problem occured while creating new user" }) { StatusCode = StatusCodes.Status422UnprocessableEntity };
@@ -87,7 +89,7 @@ public class UserService : IUserService
         {
             FirstName = registerDTO.FirstName,
             LastName = registerDTO.LastName,
-            PasswordHash = registerDTO.PasswordHash,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDTO.Password),
             UserName = (registerDTO.FirstName.ElementAt(0) + registerDTO.LastName).ToLower(),
             IsAdmin = registerDTO.IsAdmin
         };

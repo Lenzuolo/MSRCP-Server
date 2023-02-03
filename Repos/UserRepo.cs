@@ -78,14 +78,17 @@ public class UserRepo : IUserRepo
         }
     }
 
-    public async Task<User> Login(string userName, string passwordHash)
+    public async Task<User> GetUserAsync(string userName)
     {
-        var result = await context.Users.FirstOrDefaultAsync(u => u.UserName == userName && u.PasswordHash == passwordHash);
-        if (result != null)
-        {
-            result.PasswordHash = "";
-            result.WorkDatas = new List<WorkData>() { await GetTodaysWorkData(result.Id)};
-        }
+        var result = await context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+        //if (result != null)
+        //{
+        //    var workData = await GetTodaysWorkData(result.Id);
+        //    if (workData != null)
+        //    {
+        //        result.WorkDatas.Add(workData);
+        //    }
+        //}
         return result;
     }
 

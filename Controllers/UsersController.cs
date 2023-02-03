@@ -21,7 +21,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(User),StatusCodes.Status202Accepted)]
     [ProducesResponseType(typeof(SerializableError), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ExceptionDTO), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> LoginAsync([FromBody] LoginDTO loginDTO) => await userService.Login(loginDTO.UserName, loginDTO.PasswordHash);
+    public async Task<IActionResult> LoginAsync([FromBody] LoginDTO loginDTO) => await userService.Login(loginDTO.UserName, loginDTO.Password);
 
     [HttpPost]
     [ProducesResponseType(typeof(User), StatusCodes.Status201Created)]
