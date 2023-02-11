@@ -53,5 +53,15 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ExceptionDTO), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateUserAsync([FromBody] UserDTO user) => await userService.UpdateUserAsync(user);
 
+    [HttpPost("qrs")]
+    [ProducesResponseType(typeof(QR), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(SerializableError), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ExceptionDTO), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> GenerateQRAsync() => await userService.GenerateQRAsync();
 
+    [HttpPost("scan")]
+    [ProducesResponseType(typeof(WorkData), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(SerializableError), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ExceptionDTO), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ScanQRCodeAsync([FromBody] ScanDTO scanDTO) => await userService.ScanQRCodeAsync(scanDTO.User, scanDTO.Code);
 }

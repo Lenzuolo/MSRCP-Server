@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BCrypt.Net;
+using Microsoft.AspNetCore.Mvc;
 using MSRCP_Server.DTO;
 using MSRCP_Server.Models;
 using MSRCP_Server.Repos;
@@ -15,7 +16,7 @@ public class UserService : IUserService
 
     public async Task<IActionResult> Login(string userName, string password)
     {
-        var result = await userRepo.GetUserAsync(userName);
+        var result = await userRepo.GetAsync(userName);
         if (result != null && BCrypt.Net.BCrypt.Verify(password, result.PasswordHash))
         {
             result.PasswordHash = "";
@@ -66,9 +67,36 @@ public class UserService : IUserService
         return new JsonResult(new ExceptionDTO { Message = "Problem occured while getting user history logs" }) { StatusCode = StatusCodes.Status404NotFound };
     }
 
-    public Task<IActionResult> ScanQRCodeAsync(User user, string code)
+    public async Task<IActionResult> ScanQRCodeAsync(User user, string code)
     {
-        throw new NotImplementedException();
+        var result = await userRepo.ScanCodeAsync(user, code);
+        if (result != null)
+        {
+            return new JsonResult(result) { StatusCode = StatusCodes.Status200OK };
+        }
+        return new JsonResult(new ExceptionDTO { Message = "Invalid code scanned"}) { StatusCode = StatusCodes.Status404NotFound };
+    }
+
+    public async Task<IActionResult> GenerateQRAsync()
+    {
+        QR result;
+        var random = new Random();
+        while (true)
+        {
+            var code = $"MSRCP-{random.Next()}";
+            if (!userRepo.CodeAlreadyExists(code))
+            {
+                result = await userRepo.GenerateQRAsync(new QR() { Code = code, ValidDate = DateOnly.FromDateTime(DateTime.Now) });
+                break;
+            }
+        }
+        if (result != null)
+        {
+            return new JsonResult(result) { StatusCode = StatusCodes.Status201Created };
+        } else
+        {
+            return new JsonResult(new ExceptionDTO { Message = "Error generating code" }) { StatusCode = StatusCodes.Status422UnprocessableEntity };
+        }
     }
 
     public async Task<IActionResult> UpdateUserAsync(UserDTO userDTO)

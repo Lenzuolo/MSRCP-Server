@@ -24,8 +24,8 @@ public class UserRepo : IUserRepo
         var result = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
         if (result != null)
         {
+            result.CurrentWorkData = await GetTodaysWorkData(id);
             result.PasswordHash = "";
-            result.WorkDatas = new List<WorkData>() { await GetTodaysWorkData(id) };
         }
         return result;
     }
@@ -35,15 +35,9 @@ public class UserRepo : IUserRepo
         return await context.Users
             .Where(u => u.Id != adminId)
             .Include(u => u.WorkDatas
-                .Where(w => w.StartTime.Date.CompareTo(DateTime.Now.Date) == 0).Select(w => 
-                new WorkData 
-                { 
-                    Status = w.EndTime != null ? (int)WorkDataStatus.COMPLETE : (int)WorkDataStatus.WORKING,
-                    StartTime = w.StartTime,
-                    EndTime = w.EndTime
-                }))
+                .Where(w => w.StartTime.Date.CompareTo(DateTime.Now.Date) == 0))
             .Select(u => new User { FirstName = u.FirstName, LastName = u.LastName, Id = u.Id})
-            .OrderBy(u => u.WorkDatas.ToList()[0].Status)
+            .OrderBy(u => u.WorkDatas.First().Status)
             .ToListAsync();
     }
 
@@ -62,39 +56,57 @@ public class UserRepo : IUserRepo
     public async Task<WorkData> ScanCodeAsync(User user, string code)
     {
         var workData = await GetTodaysWorkData(user.Id);
-        //TODO: Pobieranie kodów z bazy kodów
-        if (workData == null)
+        var isValidCode = context.QrCodes.Any(qr => qr.Code == code && qr.ValidDate == DateOnly.FromDateTime(DateTime.Now));
+        if (isValidCode)
         {
-            var result = await context.WorkDatas.AddAsync(new WorkData { User = user, StartTime = DateTime.Now, Status = (int)WorkDataStatus.WORKING });
-            await context.SaveChangesAsync();
-            return result.Entity;
-        } else
-        {
-            workData.EndTime = DateTime.Now;
-            workData.Status = (int)WorkDataStatus.COMPLETE;
-            var result = context.WorkDatas.Update(workData);
-            await context.SaveChangesAsync();
-            return result.Entity;
+            if (workData == null)
+            {
+                var result = await context.WorkDatas.AddAsync(new WorkData { User = user, StartTime = DateTime.Now, Status = (int)WorkDataStatus.WORKING });
+                await context.SaveChangesAsync();
+                return result.Entity;
+            } else
+            {
+                workData.EndTime = DateTime.Now;
+                workData.Status = (int)WorkDataStatus.COMPLETE;
+                var result = context.WorkDatas.Update(workData);
+                await context.SaveChangesAsync();
+                return result.Entity;
+            }
         }
+        return null;
     }
 
-    public async Task<User> GetUserAsync(string userName)
+    public async Task<User> GetAsync(string userName)
     {
         var result = await context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
-        //if (result != null)
-        //{
-        //    var workData = await GetTodaysWorkData(result.Id);
-        //    if (workData != null)
-        //    {
-        //        result.WorkDatas.Add(workData);
-        //    }
-        //}
+        if (result != null)
+        {
+            result.CurrentWorkData = await GetTodaysWorkData(result.Id);
+        }
         return result;
+    }
+
+    public async Task<QR> GenerateQRAsync(QR qr)
+    {
+        var result = await context.QrCodes.AddAsync(qr);
+        await context.SaveChangesAsync();
+        return result.Entity;
+    }
+
+    public bool CodeAlreadyExists(string code)
+    {
+        return context.QrCodes.Any(r => r.Code == code);
     }
 
     private async Task<WorkData> GetTodaysWorkData(int userId)
     {
-        var result = await context.WorkDatas.FirstOrDefaultAsync(w => w.User.Id == userId && w.StartTime.Date.CompareTo(DateTime.Now.Date) == 0);
-        return result;
+        var result = await context.WorkDatas
+            .Include(w => w.User)
+            .OrderByDescending(w => w.StartTime)
+            .FirstOrDefaultAsync(w => w.User.Id == userId);
+
+        if (result != null && DateOnly.FromDateTime(result.StartTime).CompareTo(DateOnly.FromDateTime(DateTime.Now)) == 0)
+            return result;
+        else return null;
     }
 }

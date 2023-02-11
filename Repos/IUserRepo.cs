@@ -10,5 +10,7 @@ public interface IUserRepo
     Task<ICollection<User>> GetTeamAsync(int adminId);
     Task<ICollection<WorkData>> GetUserHistoryAsync(int id);
     Task<WorkData> ScanCodeAsync(User user, string code);
-    Task<User> GetUserAsync(string username);
+    Task<User> GetAsync(string username);
+    Task<QR> GenerateQRAsync(QR qr);
+    bool CodeAlreadyExists(string code);
 }

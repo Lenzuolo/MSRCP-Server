@@ -9,7 +9,9 @@ namespace MSRCP_Server.Models
         {
         }
 
+
         public DbSet<User> Users { get; set; }
         public DbSet<WorkData> WorkDatas { get; set; }
+        public DbSet<QR> QrCodes { get; set; }
     }
 }
