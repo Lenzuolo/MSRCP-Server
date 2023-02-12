@@ -29,23 +29,23 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ExceptionDTO), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> CreateAsync([FromBody] RegisterDTO registerDTO) => await userService.CreateUserAsync(registerDTO);
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(SerializableError), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ExceptionDTO), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetAsync([FromQuery] int id) => await userService.GetUserAsync(id);
+    public async Task<IActionResult> GetAsync(int id) => await userService.GetUserAsync(id);
 
     [HttpGet("history/{id:int}")]
     [ProducesResponseType(typeof(ICollection<WorkData>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(SerializableError), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ExceptionDTO), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetUserHistoryAsync([FromQuery] int id) => await userService.GetUserHistoryAsync(id);
+    public async Task<IActionResult> GetUserHistoryAsync(int id) => await userService.GetUserHistoryAsync(id);
 
     [HttpGet("team/{id:int}")]
     [ProducesResponseType(typeof(ICollection<User>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(SerializableError), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ExceptionDTO), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetTeamAsync([FromQuery] int id) => await userService.GetTeamAsync(id);
+    public async Task<IActionResult> GetTeamAsync(int id) => await userService.GetTeamAsync(id);
 
     [HttpPatch]
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
