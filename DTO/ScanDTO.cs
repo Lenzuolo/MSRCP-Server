@@ -5,8 +5,8 @@ namespace MSRCP_Server.DTO
 {
     public class ScanDTO
     {
-        [Required(ErrorMessage ="User is missing")]
-        public User User { get; set; }
+        [Required(ErrorMessage ="User id is missing")]
+        public int UserId { get; set; }
 
         [Required(ErrorMessage = "QR Code is required")]
         public string Code { get; set; }

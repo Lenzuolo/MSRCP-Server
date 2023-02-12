@@ -11,7 +11,7 @@ public interface IUserService
     Task<IActionResult> UpdateUserAsync(UserDTO userDTO);
     Task<IActionResult> GetTeamAsync(int id);
     Task<IActionResult> GetUserHistoryAsync(int id);
-    Task<IActionResult> ScanQRCodeAsync(User user, string code);
+    Task<IActionResult> ScanQRCodeAsync(int userId, string code);
     Task<IActionResult> Login(string userName, string passwordHash);
     Task<IActionResult> GenerateQRAsync();
 }

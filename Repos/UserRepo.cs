@@ -25,7 +25,6 @@ public class UserRepo : IUserRepo
         if (result != null)
         {
             result.CurrentWorkData = await GetTodaysWorkData(id);
-            result.PasswordHash = "";
         }
         return result;
     }
@@ -37,7 +36,7 @@ public class UserRepo : IUserRepo
             .Include(u => u.WorkDatas
                 .Where(w => w.StartTime.Date.CompareTo(DateTime.Now.Date) == 0))
             .Select(u => new User { FirstName = u.FirstName, LastName = u.LastName, Id = u.Id})
-            .OrderBy(u => u.WorkDatas.First().Status)
+            .OrderByDescending(u => u.WorkDatas.First().Status)
             .ToListAsync();
     }
 
@@ -53,20 +52,21 @@ public class UserRepo : IUserRepo
         return result.Entity;
     }
 
-    public async Task<WorkData> ScanCodeAsync(User user, string code)
+    public async Task<WorkData> ScanCodeAsync(int userId, string code)
     {
-        var workData = await GetTodaysWorkData(user.Id);
+        var workData = await GetTodaysWorkData(userId);
         var isValidCode = context.QrCodes.Any(qr => qr.Code == code && qr.ValidDate == DateOnly.FromDateTime(DateTime.Now));
-        if (isValidCode)
+        var user = await GetAsync(userId);
+        if (isValidCode && user != null)
         {
             if (workData == null)
             {
-                var result = await context.WorkDatas.AddAsync(new WorkData { User = user, StartTime = DateTime.Now, Status = (int)WorkDataStatus.WORKING });
+                var result = await context.WorkDatas.AddAsync(new WorkData { User = user, StartTime = DateTime.Now.ToUniversalTime(), Status = (int)WorkDataStatus.WORKING });
                 await context.SaveChangesAsync();
                 return result.Entity;
             } else
             {
-                workData.EndTime = DateTime.Now;
+                workData.EndTime = DateTime.Now.ToUniversalTime();
                 workData.Status = (int)WorkDataStatus.COMPLETE;
                 var result = context.WorkDatas.Update(workData);
                 await context.SaveChangesAsync();

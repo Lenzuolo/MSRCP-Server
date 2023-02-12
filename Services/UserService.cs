@@ -52,6 +52,7 @@ public class UserService : IUserService
         var result = await userRepo.GetAsync(id);
         if (result != null)
         {
+            result.PasswordHash = "";
             return new JsonResult(result) { StatusCode = StatusCodes.Status200OK };
         }
         return new JsonResult(new ExceptionDTO { Message = "Problem occured while getting user data" }) { StatusCode = StatusCodes.Status404NotFound };
@@ -67,14 +68,14 @@ public class UserService : IUserService
         return new JsonResult(new ExceptionDTO { Message = "Problem occured while getting user history logs" }) { StatusCode = StatusCodes.Status404NotFound };
     }
 
-    public async Task<IActionResult> ScanQRCodeAsync(User user, string code)
+    public async Task<IActionResult> ScanQRCodeAsync(int userId, string code)
     {
-        var result = await userRepo.ScanCodeAsync(user, code);
+        var result = await userRepo.ScanCodeAsync(userId, code);
         if (result != null)
         {
             return new JsonResult(result) { StatusCode = StatusCodes.Status200OK };
         }
-        return new JsonResult(new ExceptionDTO { Message = "Invalid code scanned"}) { StatusCode = StatusCodes.Status404NotFound };
+        return new JsonResult(new ExceptionDTO { Message = "Invalid code scanned or user not found"}) { StatusCode = StatusCodes.Status404NotFound };
     }
 
     public async Task<IActionResult> GenerateQRAsync()
