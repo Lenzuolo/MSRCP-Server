@@ -8,7 +8,7 @@ public interface IUserService
 {
     Task<IActionResult> CreateUserAsync(RegisterDTO registerDTO);
     Task<IActionResult> GetUserAsync(int id);
-    Task<IActionResult> UpdateUserAsync(UserDTO userDTO);
+    Task<IActionResult> UpdateUserAsync(UpdateUserDTO userDTO);
     Task<IActionResult> GetTeamAsync(int id);
     Task<IActionResult> GetUserHistoryAsync(int id);
     Task<IActionResult> ScanQRCodeAsync(int userId, string code);

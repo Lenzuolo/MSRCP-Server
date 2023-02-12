@@ -51,7 +51,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(SerializableError), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ExceptionDTO), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateUserAsync([FromBody] UserDTO user) => await userService.UpdateUserAsync(user);
+    public async Task<IActionResult> UpdateUserAsync([FromBody] UpdateUserDTO user) => await userService.UpdateUserAsync(user);
 
     [HttpPost("qrs")]
     [ProducesResponseType(typeof(QR), StatusCodes.Status201Created)]

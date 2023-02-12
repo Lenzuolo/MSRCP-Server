@@ -100,14 +100,16 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<IActionResult> UpdateUserAsync(UserDTO userDTO)
+    public async Task<IActionResult> UpdateUserAsync(UpdateUserDTO userDTO)
     {
-        var user = CreateUserFromUserDTO(userDTO);
-
-        var result = await userRepo.UpdateAsync(user);
-        if (result != null)
+        var user = await GetUserFromUpdateUserDTO(userDTO);
+        if (user != null)
         {
-            return new JsonResult(result) { StatusCode = StatusCodes.Status200OK };
+            var result = await userRepo.UpdateAsync(user);
+            if (result != null)
+            {
+                return new JsonResult(result) { StatusCode = StatusCodes.Status200OK };
+            }
         }
         return new JsonResult(new ExceptionDTO { Message = "Problem occured updating user data"}) { StatusCode = StatusCodes.Status404NotFound };
     }
@@ -124,17 +126,16 @@ public class UserService : IUserService
         };
     }
 
-    private User CreateUserFromUserDTO(UserDTO userDTO)
+    private async Task<User> GetUserFromUpdateUserDTO(UpdateUserDTO userDTO)
     {
-        return new User
+        var user = await userRepo.GetAsync(userDTO.Id);
+        if (user != null)
         {
-            FirstName = userDTO.FirstName,
-            LastName = userDTO.LastName,
-            PasswordHash = userDTO.PasswordHash,
-            UserName = userDTO.UserName,
-            IsAdmin = userDTO.IsAdmin,
-            Id = userDTO.Id
-        };
+            user.UserName = userDTO.UserName;
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
+            user.IsAdmin = userDTO.IsAdmin;
+        }
+        return user;
     }
 
 }
