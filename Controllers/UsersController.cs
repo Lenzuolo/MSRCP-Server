@@ -35,6 +35,12 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ExceptionDTO), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAsync(int id) => await userService.GetUserAsync(id);
 
+    [HttpGet("{username}")]
+    [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(SerializableError), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ExceptionDTO), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetUserIdAsync([FromRoute] string username) => await userService.GetUserIdAsync(username);
+
     [HttpGet("history/{id:int}")]
     [ProducesResponseType(typeof(ICollection<WorkData>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(SerializableError), StatusCodes.Status400BadRequest)]

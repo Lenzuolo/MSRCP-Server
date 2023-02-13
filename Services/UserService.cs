@@ -58,6 +58,16 @@ public class UserService : IUserService
         return new JsonResult(new ExceptionDTO { Message = "Problem occured while getting user data" }) { StatusCode = StatusCodes.Status404NotFound };
     }
 
+    public async Task<IActionResult> GetUserIdAsync(string username)
+    {
+        var result = await userRepo.GetUserIdAsync(username);
+        if (result != null)
+        {
+            return new JsonResult(result) { StatusCode = StatusCodes.Status200OK };
+        }
+        return new JsonResult(new ExceptionDTO { Message = "Problem occured while getting user data" }) { StatusCode = StatusCodes.Status404NotFound };
+    }
+
     public async Task<IActionResult> GetUserHistoryAsync(int id)
     {
         var result = await userRepo.GetUserHistoryAsync(id);

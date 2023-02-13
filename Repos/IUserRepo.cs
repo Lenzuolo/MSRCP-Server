@@ -7,6 +7,7 @@ public interface IUserRepo
     Task<User> AddAsync(User user);
     Task<User> UpdateAsync(User user);
     Task<User> GetAsync(int id);
+    Task<int> GetUserIdAsync(string username);
     Task<ICollection<User>> GetTeamAsync(int adminId);
     Task<ICollection<WorkData>> GetUserHistoryAsync(int id);
     Task<WorkData> ScanCodeAsync(int userId, string code);

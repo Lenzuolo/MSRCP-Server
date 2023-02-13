@@ -29,15 +29,37 @@ public class UserRepo : IUserRepo
         return result;
     }
 
+    public async Task<int> GetUserIdAsync(string username)
+    {
+        var result = await context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+        if (result != null)
+        {
+            return result.Id;
+        }
+        return -1;
+    }
+
+
     public async Task<ICollection<User>> GetTeamAsync(int adminId)
     {
-        return await context.Users
+        var teamMembers = await context.Users
             .Where(u => u.Id != adminId)
             .Include(u => u.WorkDatas
                 .Where(w => w.StartTime.Date.CompareTo(DateTime.Now.Date) == 0))
-            .Select(u => new User { FirstName = u.FirstName, LastName = u.LastName, Id = u.Id})
-            .OrderByDescending(u => u.WorkDatas.First().Status)
+            .Select(
+                u => new User
+                {
+                    FirstName = u.FirstName, 
+                    LastName = u.LastName, 
+                    Id = u.Id
+                }
+            )
             .ToListAsync();
+        foreach (var teamMember in teamMembers)
+        {
+            teamMember.CurrentWorkData = await GetTodaysWorkData(teamMember.Id);
+        }
+        return teamMembers;
     }
 
     public async Task<ICollection<WorkData>> GetUserHistoryAsync(int id)
