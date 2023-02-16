@@ -1,4 +1,4 @@
-<p align="center"><img width=80% src="https://github.com/Lenzuolo/MSRCP-Server/tree/master/Media/MSRCP-server.png"></p>
+<p align="center"><img width=80% src="https://github.com/Lenzuolo/MSRCP-Server/blob/master/Media/MSRCP-server.png"></p>
 
 # MSRCP-server project 🕒
 
@@ -11,7 +11,7 @@ Server for MSRCP project provides functionalities that includes managing employe
 
 ## 🪟 Provided endpoints
 
-<p align="center"><img src="https://github.com/Lenzuolo/MSRCP-Server/tree/master/Media/endpoints.png"></p>
+<p align="center"><img src="https://github.com/Lenzuolo/MSRCP-Server/blob/master/Media/endpoints.png"></p>
 
 ## 🔐 Requirements
 - PostgreSQL Version 15
